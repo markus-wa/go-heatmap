@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/dustin/go-heatmap/schemes"
-	"github.com/jteeuwen/imghash"
 )
 
 const testKmlImgURL = "http://www.example.com/thing.png"
@@ -61,7 +60,7 @@ func TestKML(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error generating kml: %v", err)
 	}
-	got := imghash.Average(img)
+	got := imgHash(img)
 	if got != expHash {
 		t.Errorf("Expected image hash %v, got %v", expHash, got)
 	}
@@ -153,7 +152,7 @@ func TestKMZ(t *testing.T) {
 			if err != nil {
 				t.Errorf("Error decoding image: %v", err)
 			}
-			got := imghash.Average(img)
+			got := imgHash(img)
 			if got != expHash {
 				t.Errorf("Expected image hash %v, got %v", expHash, got)
 			}

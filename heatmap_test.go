@@ -1,15 +1,17 @@
 package heatmap
 
 import (
+	"bytes"
+	"fmt"
+	"hash/fnv"
 	"image"
+	"image/png"
 	"io"
 	"math"
 	"math/rand"
 	"testing"
 
 	"github.com/dustin/go-heatmap/schemes"
-
-	"github.com/jteeuwen/imghash"
 )
 
 var testPoints = []DataPoint{}
@@ -56,14 +58,32 @@ func TestHeatmapKMLLimits(t *testing.T) {
 	}
 }
 
-const expHash = uint64(62624876249118208)
+const expHash = uint64(17499379771095836972)
 
 func TestMkImage(t *testing.T) {
-	got := imghash.Average(Heatmap(image.Rect(0, 0, 1024, 1024),
-		testPoints, 150, 128, schemes.AlphaFire))
+	heatmap := Heatmap(image.Rect(0, 0, 1024, 1024),
+		testPoints, 150, 128, schemes.AlphaFire)
+
+	got := imgHash(heatmap)
 	if got != expHash {
 		t.Errorf("Expected hash = %v, got %v", expHash, got)
 	}
+}
+
+func imgHash(img image.Image) uint64 {
+	var buf bytes.Buffer
+	err := png.Encode(&buf, img)
+	if err != nil {
+		panic(fmt.Sprint("Failed to encode image:", err))
+	}
+
+	hash := fnv.New64()
+	_, err = hash.Write(buf.Bytes())
+	if err != nil {
+		panic(fmt.Sprint("Failed to generate hash:", err))
+	}
+
+	return hash.Sum64()
 }
 
 func TestMust(t *testing.T) {
